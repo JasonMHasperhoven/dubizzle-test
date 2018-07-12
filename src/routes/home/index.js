@@ -12,7 +12,7 @@ import Home from './Home';
 
 async function action() {
   return {
-    title: 'React Starter Kit',
+    title: 'Dubizzle Gists Test',
     chunks: ['home'],
     component: <Home />,
   };

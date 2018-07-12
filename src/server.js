@@ -14,6 +14,7 @@ import bodyParser from 'body-parser';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import PrettyError from 'pretty-error';
+import { ServerStyleSheet, StyleSheetManager } from 'styled-components';
 import App from './components/App';
 import Html from './components/Html';
 import { ErrorPageWithoutStyle } from './routes/error/ErrorPage';
@@ -59,6 +60,7 @@ app.use(bodyParser.json());
 app.get('*', async (req, res, next) => {
   try {
     const css = new Set();
+    const sheet = new ServerStyleSheet();
 
     // Enables critical path CSS rendering
     // https://github.com/kriasoft/isomorphic-style-loader
@@ -90,8 +92,11 @@ app.get('*', async (req, res, next) => {
 
     const data = { ...route };
     data.children = ReactDOM.renderToString(
-      <App context={context}>{route.component}</App>,
+      <StyleSheetManager sheet={sheet.instance}>
+        <App context={context}>{route.component}</App>
+      </StyleSheetManager>,
     );
+    data.styleElement = sheet.getStyleElement();
     data.styles = [{ id: 'css', cssText: [...css].join('') }];
 
     const scripts = new Set();

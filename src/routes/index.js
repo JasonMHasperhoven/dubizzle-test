@@ -32,7 +32,7 @@ const routes = {
     const route = await next();
 
     // Provide default values for title, description etc.
-    route.title = 'Dubizzle Gists test';
+    route.title = route.title || 'Dubizzle Gists Test';
     route.description = route.description || '';
 
     return route;
