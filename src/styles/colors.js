@@ -1,6 +1,6 @@
 import { mix, lighten } from 'polished';
 
-export const primary = '#2dbcbe';
+export const primary = '#0384d6';
 
 export const grey = '#f8f8f8';
 

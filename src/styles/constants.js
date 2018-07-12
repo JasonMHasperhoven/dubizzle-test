@@ -1,4 +1,4 @@
-export const siteWidth = 1024;
+export const siteWidth = 800;
 
 export const spacing = 16;
 

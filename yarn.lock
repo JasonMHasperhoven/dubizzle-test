@@ -846,6 +846,12 @@
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.0.tgz#50c1e2260ac0ed9439a181de3725a0168d59c48a"
 
+"@rematch/core@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@rematch/core/-/core-0.6.0.tgz#4f42c91e20445be5fcb949c1ae2a4dc27bffa82e"
+  dependencies:
+    redux "^3.7.2"
+
 "@samverschueren/stream-to-observable@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@samverschueren/stream-to-observable/-/stream-to-observable-0.3.0.tgz#ecdf48d532c58ea477acfcab80348424f8d0662f"
