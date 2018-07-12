@@ -28,5 +28,14 @@ module.exports = {
     '@babel/preset-flow',
     '@babel/preset-react',
   ],
+  plugins: [
+    [
+      'styled-components',
+      {
+        ssr: true,
+        displayName: true,
+      },
+    ],
+  ],
   ignore: ['node_modules', 'build'],
 };

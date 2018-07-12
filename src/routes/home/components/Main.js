@@ -5,7 +5,7 @@ import moment from 'moment';
 import styled, { css } from 'styled-components';
 import MDSpinner from 'react-md-spinner';
 import { clearFix } from 'polished';
-import { spacing, media, card, uppercase } from 'styles';
+import { spacing, media, card, uppercase } from '../../../styles';
 
 const GistTitle = styled.h3`
   font-size: 18px;
@@ -14,6 +14,14 @@ const GistTitle = styled.h3`
   ${media.min460} {
     font-size: 24px;
     margin-bottom: ${spacing(1.5)};
+  }
+`;
+
+const GistTitleAnchor = styled.a`
+  color: white;
+
+  &:hover {
+    text-decoration: underline;
   }
 `;
 
@@ -32,19 +40,7 @@ const GistRow = styled.div`
   }
 `;
 
-const Card = styled(props => {
-  const { children, href, target, ...rest } = props;
-
-  if (props.href) {
-    return (
-      <a href={href} target={target} {...rest}>
-        {children}
-      </a>
-    );
-  }
-
-  return <div {...rest}>{children}</div>;
-})`
+const Card = styled.div`
   ${card};
   display: block;
   transition: background 0.2s;
@@ -55,10 +51,6 @@ const Card = styled(props => {
       props.href &&
       css`
         background: rgba(0, 0, 0, 0.3);
-
-        ${GistTitle} {
-          text-decoration: underline;
-        }
 
         ${GistRow} {
           opacity: 1;
@@ -182,10 +174,20 @@ export default class Main extends React.Component {
     gists: PropTypes.arrayOf(
       PropTypes.shape({
         description: PropTypes.string,
+        files: PropTypes.object,
+        created_at: PropTypes.string,
+        forks: PropTypes.array,
+        forksError: PropTypes.object,
       }),
     ).isRequired,
-    failure: PropTypes.bool.isRequired,
+    failure: PropTypes.shape({
+      message: PropTypes.string,
+    }),
     loading: PropTypes.bool.isRequired,
+  };
+
+  static defaultProps = {
+    failure: null,
   };
 
   renderContent() {
@@ -229,62 +231,73 @@ export default class Main extends React.Component {
       );
     }
 
-    return gists.map(gist => (
-      <Card href={gist.url} target="_blank" key={gist.created_at}>
-        <GistTitle>
-          {gist.description ||
-            // eslint-disable-next-line no-unused-vars
-            Object.values(gist.files).find(first => true).filename}
-        </GistTitle>
-        <GistRow>
-          <GistColumn>Created at</GistColumn>
-          <GistColumn>
-            {moment(gist.created_at).format('MMM Do YYYY')}
-          </GistColumn>
-        </GistRow>
-        <GistRow>
-          <GistColumn>Last forked by</GistColumn>
-          <GistColumn>
-            {!gist.forks &&
-              !gist.forksError && (
-                <MDSpinner singleColor="white" borderSize={2} size={22} />
-              )}
-            {gist.forks &&
-              !gist.forksError &&
-              (gist.forks.length
-                ? gist.forks
-                    .sort(
-                      (a, b) => new Date(b.created_at) - new Date(a.created_at),
-                    )
-                    .filter((f, i) => i < 3)
-                    .map(fork => (
-                      <Forker href={fork.url} target="_blank" key={fork.id}>
-                        <ForkerAvatar
-                          url={(fork.user || fork.owner).avatar_url}
-                        />
-                        <ForkerName>
-                          {(fork.user || fork.owner).login}
-                        </ForkerName>
-                      </Forker>
-                    ))
-                : 'No forks')}
-            {!!gist.forksError && gist.forksError.message}
-          </GistColumn>
-        </GistRow>
-        <GistRow>
-          <GistColumn>Tags</GistColumn>
-          <GistColumn>
-            {[
-              ...new Set(
-                Object.values(gist.files)
-                  .map(file => file.language)
-                  .filter(value => value),
-              ),
-            ].map(language => <Tag>{language}</Tag>)}
-          </GistColumn>
-        </GistRow>
-      </Card>
-    ));
+    return (
+      <React.Fragment>
+        {gists.map(gist => (
+          <Card key={gist.created_at}>
+            <GistTitle>
+              <GistTitleAnchor href={gist.html_url} target="_blank">
+                {gist.description ||
+                  // eslint-disable-next-line no-unused-vars
+                  Object.values(gist.files).find(first => true).filename}
+              </GistTitleAnchor>
+            </GistTitle>
+            <GistRow>
+              <GistColumn>Created at</GistColumn>
+              <GistColumn>
+                {moment(gist.created_at).format('MMM Do YYYY')}
+              </GistColumn>
+            </GistRow>
+            <GistRow>
+              <GistColumn>Last forked by</GistColumn>
+              <GistColumn>
+                {!gist.forks &&
+                  !gist.forksError && (
+                    <MDSpinner singleColor="white" borderSize={2} size={22} />
+                  )}
+                {gist.forks &&
+                  !gist.forksError &&
+                  (gist.forks.length
+                    ? gist.forks
+                        .sort(
+                          (a, b) =>
+                            new Date(b.created_at) - new Date(a.created_at),
+                        )
+                        .filter((f, i) => i < 3)
+                        .map(fork => (
+                          <Forker
+                            href={fork.html_url}
+                            target="_blank"
+                            key={fork.id}
+                          >
+                            <ForkerAvatar
+                              url={(fork.user || fork.owner).avatar_url}
+                            />
+                            <ForkerName>
+                              {(fork.user || fork.owner).login}
+                            </ForkerName>
+                          </Forker>
+                        ))
+                    : 'No forks')}
+                {!!gist.forksError && gist.forksError.message}
+              </GistColumn>
+            </GistRow>
+            <GistRow>
+              <GistColumn>Tags</GistColumn>
+              <GistColumn>
+                {[
+                  ...new Set(
+                    Object.values(gist.files)
+                      .map(file => file.language)
+                      .filter(value => value),
+                  ),
+                ].map(language => <Tag key={language}>{language}</Tag>)}
+              </GistColumn>
+            </GistRow>
+          </Card>
+        ))}
+      </React.Fragment>
+    );
   }
 
   render() {

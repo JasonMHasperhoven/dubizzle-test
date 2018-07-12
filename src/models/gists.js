@@ -7,7 +7,7 @@ export default {
     query: '',
     results: [],
     fetching: false,
-    failure: false,
+    failure: null,
   },
 
   reducers: {
@@ -24,7 +24,7 @@ export default {
         ...state,
         results: payload,
         fetching: false,
-        failure: false,
+        failure: null,
       };
     },
 
@@ -74,7 +74,7 @@ export default {
       this.fetchRequest(username);
     },
 
-    async fetchRequest(username) {
+    fetchRequest(username) {
       return axios({
         method: 'get',
         url: `https://api.github.com/users/${username}/gists`,
@@ -99,13 +99,13 @@ export default {
       cancelTokens = [];
     },
 
-    async fetchForksRequest(payload) {
+    fetchForksRequest(payload) {
       payload.forEach(gist => {
         this.fetchForkRequest(gist);
       });
     },
 
-    async fetchForkRequest(gist) {
+    fetchForkRequest(gist) {
       return axios({
         method: 'get',
         url: gist.forks_url,
