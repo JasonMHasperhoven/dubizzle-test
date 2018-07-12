@@ -3,16 +3,9 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import styled from 'styled-components';
+import MDSpinner from 'react-md-spinner';
 import { clearFix } from 'polished';
 import { spacing, media, card, uppercase } from 'styles';
-
-const Card = styled.div`
-  ${card};
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-`;
 
 const GistTitle = styled.h3`
   font-size: 18px;
@@ -28,6 +21,7 @@ const GistRow = styled.div`
   ${clearFix()};
   margin-bottom: ${spacing()};
   opacity: 0.8;
+  transition: opacity 0.2s;
 
   &:last-child {
     margin-bottom: 0;
@@ -35,6 +29,54 @@ const GistRow = styled.div`
 
   ${media.max460} {
     font-size: 13px;
+  }
+`;
+
+const Card = styled.a`
+  ${card};
+  display: block;
+  transition: background 0.2s;
+  color: #fff;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.3);
+
+    ${GistTitle} {
+      text-decoration: underline;
+    }
+
+    ${GistRow} {
+      opacity: 1;
+    }
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const PlaceholderTitle = styled.div`
+  width: 50%;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 4px;
+  margin-bottom: ${spacing(0.75)};
+
+  ${media.min460} {
+    height: 29px;
+    margin-bottom: ${spacing(1.5)};
+  }
+`;
+
+const PlaceholderDetails = styled.div`
+  width: ${props => props.width}%;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  margin-bottom: 22px;
+
+  &:last-child {
+    margin-bottom: 0;
   }
 `;
 
@@ -126,7 +168,14 @@ export default class Main extends React.Component {
     const { gists, query, loading, failure } = this.props;
 
     if (loading) {
-      return <Card>Loading ...</Card>;
+      return (
+        <Card>
+          <PlaceholderTitle />
+          <PlaceholderDetails width={20} />
+          <PlaceholderDetails width={60} />
+          <PlaceholderDetails width={38} />
+        </Card>
+      );
     }
 
     if (failure && query) {
@@ -152,7 +201,7 @@ export default class Main extends React.Component {
     }
 
     return gists.map(gist => (
-      <Card key={gist.created_at}>
+      <Card href={gist.url} target="_blank" key={gist.created_at}>
         <GistTitle>
           {gist.description ||
             // eslint-disable-next-line no-unused-vars
@@ -167,7 +216,10 @@ export default class Main extends React.Component {
         <GistRow>
           <GistColumn>Last forked by</GistColumn>
           <GistColumn>
-            {!gist.forks && !gist.forksError && 'Loading...'}
+            {!gist.forks &&
+              !gist.forksError && (
+                <MDSpinner singleColor="white" borderSize={2} size={22} />
+              )}
             {gist.forks &&
               !gist.forksError &&
               (gist.forks.length
