@@ -1,6 +1,9 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import MDSpinner from 'react-md-spinner';
+import debounce from 'lodash/debounce';
 import { spacing, media, colors } from '../../../styles';
 
 const searchIcon = (
@@ -39,6 +42,7 @@ const Input = styled.input`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: ${spacing(0.75)};
   padding-left: 46px;
+  color: ${colors.text};
 
   ${media.min460} {
     font-size: 16px;
@@ -78,28 +82,64 @@ const Icon = styled.div`
   }
 `;
 
-const propTypes = {
-  query: PropTypes.string,
-  onSearchInput: PropTypes.func,
-};
+@connect(
+  state => ({
+    fetching: state.gists.fetching,
+  }),
+  dispatch => ({
+    fetchGistsByUsername: dispatch.gists.fetchGistsByUsername,
+  }),
+)
+export default class Search extends React.Component {
+  static propTypes = {
+    fetchGistsByUsername: PropTypes.func.isRequired,
+  };
 
-const defaultProps = {
-  query: '',
-  onSearchInput: () => null,
-};
+  state = {
+    loading: false,
+  };
 
-export default function Search({ query, onSearchInput }) {
-  return (
-    <Root>
-      <Input
-        placeholder="Search by username..."
-        value={query}
-        onChange={onSearchInput}
-      />
-      <Icon>{searchIcon}</Icon>
-    </Root>
+  static getDerivedStateFromProps(nextProps) {
+    return {
+      loading: nextProps.fetching,
+    };
+  }
+
+  onSearchInputChange = event => {
+    const query = event.target.value;
+    this.setState({ query }, () => {
+      this.fetchGistsByUsername(query);
+    });
+  };
+
+  fetchGistsByUsername = debounce(
+    () => this.props.fetchGistsByUsername(this.state.query),
+    300,
   );
-}
 
-Search.propTypes = propTypes;
-Search.defaultProps = defaultProps;
+  render() {
+    const { loading } = this.state;
+
+    return (
+      <Root>
+        <Input
+          placeholder="Search by username..."
+          onChange={this.onSearchInputChange}
+        />
+        <Icon>{searchIcon}</Icon>
+        {loading && (
+          <MDSpinner
+            singleColor={colors.primary}
+            borderSize={2}
+            size={22}
+            style={{
+              position: 'absolute',
+              top: 12,
+              right: 16,
+            }}
+          />
+        )}
+      </Root>
+    );
+  }
+}

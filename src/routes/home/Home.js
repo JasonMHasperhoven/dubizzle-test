@@ -13,7 +13,18 @@ const Root = styled.div`
   }
 `;
 
+const Cover = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(-135deg, #00a6ff, #004286);
+`;
+
 const Wrapper = styled.div`
+  position: relative;
+  z-index: 1;
   margin: 0 auto;
   max-width: 360px;
 
@@ -35,6 +46,7 @@ const Title = styled.h1`
 export default function Home() {
   return (
     <Root>
+      <Cover />
       <Wrapper>
         <Title>Github gists search</Title>
         <Search />

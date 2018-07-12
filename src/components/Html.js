@@ -31,7 +31,7 @@ injectGlobal`
 
   body {
     margin: 0;
-    background: linear-gradient(-135deg, #00a6ff, #004286);
+    background: ${colors.primary};
     color: ${colors.text};
 
     &:before {
