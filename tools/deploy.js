@@ -8,7 +8,7 @@
  */
 
 import path from 'path';
-import fetch from 'node-fetch';
+import axios from 'axios';
 import { spawn } from './lib/cp';
 import { makeDir, moveDir, cleanDir } from './lib/fs';
 import run from './run';
@@ -123,7 +123,7 @@ async function deploy() {
   );
 
   // Check if the site was successfully deployed
-  const response = await fetch(remote.website);
+  const response = await axios.get(remote.website);
   console.info(
     `${remote.website} => ${response.status} ${response.statusText}`,
   );

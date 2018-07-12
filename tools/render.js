@@ -8,7 +8,7 @@
  */
 
 import path from 'path';
-import fetch from 'node-fetch';
+import axios from 'axios';
 import { writeFile, makeDir } from './lib/fs';
 import runServer from './runServer';
 
@@ -53,7 +53,7 @@ async function render() {
       );
       const dist = path.join(dirName, fileName);
       const timeStart = new Date();
-      const response = await fetch(url);
+      const response = await axios.get(url);
       const timeEnd = new Date();
       const text = await response.text();
       await makeDir(dirName);
