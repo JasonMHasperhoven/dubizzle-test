@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import MDSpinner from 'react-md-spinner';
 import { clearFix } from 'polished';
 import { spacing, media, card, uppercase } from 'styles';
@@ -32,22 +32,38 @@ const GistRow = styled.div`
   }
 `;
 
-const Card = styled.a`
+const Card = styled(props => {
+  const { children, href, target, ...rest } = props;
+
+  if (props.href) {
+    return (
+      <a href={href} target={target} {...rest}>
+        {children}
+      </a>
+    );
+  }
+
+  return <div {...rest}>{children}</div>;
+})`
   ${card};
   display: block;
   transition: background 0.2s;
   color: #fff;
 
   &:hover {
-    background: rgba(0, 0, 0, 0.3);
+    ${props =>
+      props.href &&
+      css`
+        background: rgba(0, 0, 0, 0.3);
 
-    ${GistTitle} {
-      text-decoration: underline;
-    }
+        ${GistTitle} {
+          text-decoration: underline;
+        }
 
-    ${GistRow} {
-      opacity: 1;
-    }
+        ${GistRow} {
+          opacity: 1;
+        }
+      `};
   }
 
   &:last-child {
@@ -106,19 +122,6 @@ const Tag = styled.div`
   border-radius: 4px;
 `;
 
-const Forker = styled.div`
-  ${clearFix()};
-  margin-bottom: 2px;
-
-  ${media.min460} {
-    margin-bottom: 6px;
-  }
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-`;
-
 const ForkerAvatar = styled.div`
   float: left;
   width: 20px;
@@ -140,6 +143,27 @@ const ForkerName = styled.div`
 
   ${media.min460} {
     line-height: 28px;
+  }
+`;
+
+const Forker = styled.a`
+  ${clearFix()};
+  display: block;
+  margin-bottom: 2px;
+  color: #fff;
+
+  ${media.min460} {
+    margin-bottom: 6px;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    ${ForkerName} {
+      text-decoration: underline;
+    }
   }
 `;
 
@@ -179,13 +203,18 @@ export default class Main extends React.Component {
     }
 
     if (failure && query) {
-      if (failure.message !== '') {
+      if (failure.message === 'Not Found') {
         return (
           <Card>
             Couldn’t find user <em>{query}</em>
           </Card>
         );
       }
+      return (
+        <Card>
+          Something went wrong <em>{failure.message}</em>
+        </Card>
+      );
     }
 
     if (!query && !gists.length) {
@@ -223,16 +252,23 @@ export default class Main extends React.Component {
             {gist.forks &&
               !gist.forksError &&
               (gist.forks.length
-                ? gist.forks.filter((f, i) => i < 3).map(fork => (
-                    <Forker key={fork.id}>
-                      <ForkerAvatar
-                        url={(fork.user || fork.owner).avatar_url}
-                      />
-                      <ForkerName>{(fork.user || fork.owner).login}</ForkerName>
-                    </Forker>
-                  ))
+                ? gist.forks
+                    .sort(
+                      (a, b) => new Date(b.created_at) - new Date(a.created_at),
+                    )
+                    .filter((f, i) => i < 3)
+                    .map(fork => (
+                      <Forker href={fork.url} target="_blank" key={fork.id}>
+                        <ForkerAvatar
+                          url={(fork.user || fork.owner).avatar_url}
+                        />
+                        <ForkerName>
+                          {(fork.user || fork.owner).login}
+                        </ForkerName>
+                      </Forker>
+                    ))
                 : 'No forks')}
-            {!!gist.forksError && gist.forksError}
+            {!!gist.forksError && gist.forksError.message}
           </GistColumn>
         </GistRow>
         <GistRow>

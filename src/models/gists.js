@@ -89,7 +89,9 @@ export default {
           resp =>
             this.fetchSuccess(resp.data) && this.fetchForksRequest(resp.data),
         )
-        .catch(error => !isCancel(error) && this.fetchFailure(error));
+        .catch(
+          error => !isCancel(error) && this.fetchFailure(error.response.data),
+        );
     },
 
     fetchCancel() {
@@ -125,7 +127,7 @@ export default {
             !isCancel(error) &&
             this.fetchForkFailure({
               id: gist.id,
-              forks: error,
+              error: error.response.data,
             }),
         );
     },
